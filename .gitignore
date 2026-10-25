@@ -1,2 +1,6 @@
 # macOS
 *.DS_Store
+
+# Node / Vite
+node_modules/
+dist/
