@@ -8,7 +8,8 @@ Let the user play with the physics while it runs: sliders for G (Attraction stre
 
 ## Acceptance criteria
 
-- [ ] Four sliders (plain HTML `range` inputs), each with a label and its current value shown next to it
+- [ ] Sliders (plain HTML `range` inputs), each with a label and its current value shown next to it
+- [ ] Number of sliders: Equal to parameters of model, plus number of bodies
 - [ ] Moving a slider takes effect at the next Step, without a Reset
 - [ ] Start values are the default Parameters from #2
 - [ ] The derived Equilibrium distance r₀ = √(K/G) is shown, so the user sees what G and K mean together
