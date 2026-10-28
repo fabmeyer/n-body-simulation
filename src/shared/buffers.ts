@@ -25,3 +25,10 @@ export function createBodyBuffers(device: GPUDevice, n: number, startParams: Par
     writeParams(device, params, {...startParams, N: n}); // N has to match the buffer size
     return {positions, velocities, params, n};
 }
+
+// frees the GPU memory right away instead of waiting for garbage collection
+export function destroyBodyBuffers(buffers: BodyBuffers): void {
+    buffers.positions.destroy();
+    buffers.velocities.destroy();
+    buffers.params.destroy();
+}

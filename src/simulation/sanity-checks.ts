@@ -2,9 +2,10 @@
  * sanity checks from issues #4 and #5, run on the GPU with the real shaders
  * open the page with ?check (http://localhost:5173/?check) and look at the console
  */
-import {createBodyBuffers, type BodyBuffers} from '../shared/buffers.ts';
+import {createBodyBuffers, destroyBodyBuffers, type BodyBuffers} from '../shared/buffers.ts';
 import {createSimulation} from './simulation.ts';
-import {SPHERE_RADIUS, uploadInitialConditions} from './initial-conditions.ts';
+import {uploadInitialConditions} from './initial-conditions.ts';
+import {initialRadius} from '../shared/initial-radius.ts';
 import {readBuffer, readMapped} from './readback.ts';
 
 const BODY_BYTES = 4 * 4;
@@ -38,7 +39,7 @@ async function checkOneStep(device: GPUDevice): Promise<CheckResult> {
     const towardsEachOther = v[0] > 0 && v[4] < 0; // left Body moves right, right Body moves left
     const equalSize = Math.abs(length(v, 0) - length(v, 4)) < 1e-6 * length(v, 0);
     const onAxis = v[1] === 0 && v[2] === 0 && v[5] === 0 && v[6] === 0;
-    destroy(buffers);
+    destroyBodyBuffers(buffers);
     return {
         check: '#4: 2 Bodies, 1 Step',
         result: `v0 = ${v[0].toExponential(3)}, v1 = ${v[4].toExponential(3)}`,
@@ -75,7 +76,7 @@ async function checkTwoBodySwing(device: GPUDevice): Promise<CheckResult> {
     const fmt = (values: number[]) => values.map((d) => d.toFixed(3)).join(', ');
 
     staging.destroy();
-    destroy(buffers);
+    destroyBodyBuffers(buffers);
     return {
         check: `#5: 2 Bodies, ${steps} Steps`,
         result: `closest: ${fmt(minima)} | farthest: ${fmt(maxima)}`,
@@ -102,19 +103,13 @@ async function checkFiftyBodies(device: GPUDevice, seed: number): Promise<CheckR
     const maxRadius = (data: Float32Array) => Math.max(...Array.from({length: n}, (_, i) => length(data, i * 4)));
     const masses = Array.from({length: n}, (_, i) => p[i * 4 + 3]);
     const finite = p.every(Number.isFinite);
-    destroy(buffers);
+    destroyBodyBuffers(buffers);
     return {
         check: `#5: ${n} Bodies, seed ${seed}, ${steps} Steps`,
         result: `farthest Body from the centre: ${maxRadius(start).toFixed(2)} -> ${maxRadius(p).toFixed(2)}`,
         // "not to infinity": no NaN/Infinity and everything still within 10x the starting sphere
-        pass: finite && maxRadius(p) < 10 * SPHERE_RADIUS && masses.every((m) => m === 1),
+        pass: finite && maxRadius(p) < 10 * initialRadius(n) && masses.every((m) => m === 1),
     };
-}
-
-function destroy(buffers: BodyBuffers): void {
-    buffers.positions.destroy();
-    buffers.velocities.destroy();
-    buffers.params.destroy();
 }
 
 export async function runSanityChecks(device: GPUDevice): Promise<boolean> {

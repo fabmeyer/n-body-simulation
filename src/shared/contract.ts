@@ -10,7 +10,8 @@
  *               N is u32, the rest f32, buffer size rounded up to 32 bytes
  *
  * N is stored twice: BodyBuffers.n (size of the buffers) and Params.N (read by the shaders)
- * createBodyBuffers sets both, so they always match; when N changes, make new buffers
+ * createBodyBuffers sets both, so they always match; when N changes, main.ts makes new buffers,
+ * hands them to both parts with setBuffers (bind groups point at specific buffers) and destroys the old ones
  *
  * defaults: G = 1, K = 1, softening = 0.05, dt = 0.01, N = 50 (DEFAULT_PARAMS in params.ts)
  *
@@ -25,10 +26,12 @@ import type {BodyBuffers} from './buffers.ts';
 
 export interface Simulation {
     recordStep(encoder: GPUCommandEncoder): void;
+    setBuffers(buffers: BodyBuffers): void; // after N changed, keeps the pipelines
 }
 
 export interface Renderer {
     recordDraw(encoder: GPUCommandEncoder, target: GPUTextureView): void;
+    setBuffers(buffers: BodyBuffers): void; // after N changed, keeps the pipeline
 }
 
 export type CreateSimulation = (device: GPUDevice, buffers: BodyBuffers) => Simulation;

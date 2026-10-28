@@ -15,7 +15,9 @@ npm run dev
 Open http://localhost:5173 in a browser with WebGPU (Chrome or Edge work best). `localhost` is a
 secure context, so `navigator.gpu` works without any HTTPS setup.
 
-Until the Renderer (#6, #7) and the frame loop (#8) exist, the page only clears the canvas to blue.
+The page starts paused with 50 Bodies. **Start/Pause** runs one Step per frame, **Reset** restarts from the
+same Initial conditions, the sliders change G, K, Softening and `dt` while it runs, and N (2 to 10,000)
+rebuilds the buffers and resets. The top-right corner shows FPS and ms per frame.
 
 ## Sanity checks
 
@@ -28,7 +30,8 @@ use `readBuffer` from `src/simulation/readback.ts`.
 - `src/main.ts`: entry point, owns the device and the frame loop
 - `src/shared/`: the data contract (`contract.ts`), buffers and Parameters shared by everything
 - `src/simulation/`: Initial conditions and the force and position compute shaders
-- `src/renderer/`: drawing the Bodies (not started yet)
+- `src/renderer/`: fixed camera and drawing the Bodies
+- `src/ui/`: FPS readout and Parameter sliders
 - `examples/`: the Torus Knot examples from class, at http://localhost:5173/examples/1-torus-knot/ etc.
 
 ## Shaders

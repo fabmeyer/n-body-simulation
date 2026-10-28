@@ -10,7 +10,7 @@ struct Camera {
 @group(0) @binding(0) var<uniform> camera: Camera;
 @group(0) @binding(1) var<storage, read> positions: array<vec4f>; // read-only, vertex shaders can't write storage
 
-const DOT_RADIUS = 0.1; // a tenth of the Equilibrium distance
+const DOT_RADIUS = 0.15; // a tenth of the Equilibrium distance
 
 struct VertexOut {
     @builtin(position) position: vec4f,
