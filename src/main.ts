@@ -1,10 +1,17 @@
 import {initWebGPU} from './shared/webgpu-init.ts';
+import {runSanityChecks} from './simulation/sanity-checks.ts';
 
 const canvas = document.getElementById('gpuCanvas') as HTMLCanvasElement;
 const errorBox = document.getElementById('error') as HTMLDivElement;
 
 try { // without this the page just stays black when WebGPU fails
     const {device, context} = await initWebGPU(canvas);
+
+    // http://localhost:5173/?check runs the Simulation sanity checks, results are in the console
+    if (new URLSearchParams(location.search).has('check')) {
+        const passed = await runSanityChecks(device);
+        errorBox.textContent = passed ? 'Sanity checks passed (details in the console)' : 'Sanity checks FAILED (details in the console)';
+    }
 
     function frame() {
         const encoder = device.createCommandEncoder();

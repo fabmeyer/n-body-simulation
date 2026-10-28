@@ -11,8 +11,10 @@ export interface Params {
 
 export const DEFAULT_PARAMS: Params = {G: 1, K: 1, softening: 0.05, dt: 0.01, N: 50};
 
+// byte offsets come from struct Params in params.wgsl, so the two can't get out of sync
+// keep the fields above in the same order as there
 const defs = makeShaderDataDefinitions(paramsWgsl);
-export const paramsView = makeStructuredView(defs.structs.Params);
+const paramsView = makeStructuredView(defs.structs.Params);
 
 // uniform buffer size has to be a multiple of 16 (20 -> 32 bytes)
 export const PARAMS_BUFFER_SIZE = Math.ceil(paramsView.arrayBuffer.byteLength / 16) * 16;

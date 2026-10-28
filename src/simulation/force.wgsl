@@ -3,9 +3,11 @@
 @group(0) @binding(1) var<storage, read> positions: array<vec4f>;
 @group(0) @binding(2) var<storage, read_write> velocities: array<vec4f>;
 
-@compute @workgroup_size(64)
-fn cs_main(@builtin(global_invocation_id) id_a: vec3u) {
-    let id = id_a.x;
+override WORKGROUP_SIZE: u32; // set in simulation.ts
+
+@compute @workgroup_size(WORKGROUP_SIZE)
+fn cs_main(@builtin(global_invocation_id) global_id: vec3u) {
+    let id = global_id.x;
     if (id >= params.N) {
         return;
     }
@@ -16,7 +18,7 @@ fn cs_main(@builtin(global_invocation_id) id_a: vec3u) {
         let d = positions[j].xyz - xi;
         let s = sqrt(dot(d, d) + params.softening * params.softening);
         let s3 = s * s * s;
-        a += positions[j].w * (params.G / s3 - params.K / (s3 * s * s)) * d; // G pulls, K pushes
+        a += positions[j].w * (params.G / s3 - params.K / (s3 * s * s)) * d; // G = Attraction, K = Repulsion
     }
     velocities[id] = vec4f(velocities[id].xyz + a * params.dt, velocities[id].w);
 }

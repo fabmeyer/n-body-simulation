@@ -3,6 +3,9 @@ import forceWgsl from './force.wgsl?raw';
 import positionWgsl from './position.wgsl?raw';
 import type {CreateSimulation} from '../shared/contract.ts';
 
+// the only place the workgroup size is set, both shaders get it as an override constant
+const WORKGROUP_SIZE = 64;
+
 export const createSimulation: CreateSimulation = (device, buffers) => {
     // ?raw doesn't resolve #include, so the Params struct is just put in front
     const forceModule = device.createShaderModule({code: paramsWgsl + forceWgsl});
@@ -10,11 +13,11 @@ export const createSimulation: CreateSimulation = (device, buffers) => {
 
     const forcePipeline = device.createComputePipeline({
         layout: 'auto',
-        compute: {module: forceModule, entryPoint: 'cs_main'},
+        compute: {module: forceModule, entryPoint: 'cs_main', constants: {WORKGROUP_SIZE}},
     });
     const positionPipeline = device.createComputePipeline({
         layout: 'auto',
-        compute: {module: positionModule, entryPoint: 'cs_main'},
+        compute: {module: positionModule, entryPoint: 'cs_main', constants: {WORKGROUP_SIZE}},
     });
 
     const entries = [
@@ -26,7 +29,7 @@ export const createSimulation: CreateSimulation = (device, buffers) => {
     const forceBindGroup = device.createBindGroup({layout: forcePipeline.getBindGroupLayout(0), entries});
     const positionBindGroup = device.createBindGroup({layout: positionPipeline.getBindGroupLayout(0), entries});
 
-    const workgroups = Math.ceil(buffers.n / 64);
+    const workgroups = Math.ceil(buffers.n / WORKGROUP_SIZE);
 
     return {
         recordStep(encoder) {

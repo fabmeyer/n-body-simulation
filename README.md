@@ -1,18 +1,35 @@
-# Torus Knot Examples
+# N-Body Simulation
 
-Vite + TypeScript scaffold for in-class Torus Knot examples.
+A real-time 3D n-body simulation that runs in the browser on the GPU (WebGPU, Vite + TypeScript).
+Vocabulary is in [`GLOSSARY.md`](GLOSSARY.md), the issue plan in [`docs/issues/`](docs/issues/README.md).
 
 ## Setup
 
-Install Node.js.
+Install Node.js, then:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:5173 — it lists the examples. `localhost` is a secure
-context, so `navigator.gpu` works with no HTTPS setup needed.
+Open http://localhost:5173 in a browser with WebGPU (Chrome or Edge work best). `localhost` is a
+secure context, so `navigator.gpu` works without any HTTPS setup.
+
+Until the Renderer (#6, #7) and the frame loop (#8) exist, the page only clears the canvas to blue.
+
+## Sanity checks
+
+http://localhost:5173/?check runs the Simulation checks from issues #4 and #5 on the GPU and prints a
+table to the browser console (DevTools: Cmd+Option+J / Ctrl+Shift+J). To look at buffers yourself,
+use `readBuffer` from `src/simulation/readback.ts`.
+
+## Code layout
+
+- `src/main.ts`: entry point, owns the device and the frame loop
+- `src/shared/`: the data contract (`contract.ts`), buffers and Parameters shared by everything
+- `src/simulation/`: Initial conditions and the force and position compute shaders
+- `src/renderer/`: drawing the Bodies (not started yet)
+- `examples/`: the Torus Knot examples from class, at http://localhost:5173/examples/1-torus-knot/ etc.
 
 ## Shaders
 
@@ -22,22 +39,18 @@ context, so `navigator.gpu` works with no HTTPS setup needed.
 import shaderCode from './shader.wgsl?raw';
 ```
 
-`vite-plugin-glsl` is also enabled, so shaders can share code with
-`#include "../_shared/common.wgsl"`-style imports once you have logic you
-want to factor out (noise functions, shared structs, etc.), and shader
-files hot-reload on save.
+`?raw` does not resolve `#include`, so shared code (like `struct Params` in `src/shared/params.wgsl`)
+is put in front of the shader string in TypeScript, see `src/simulation/simulation.ts`.
 
 ## Type checking
 
-WebStorm's TS service + `@webgpu/types` gives live autocomplete on
-`GPUDevice`, `GPUBuffer`, etc. Note that `vite build` does **not**
-type-check by default (esbuild just strips types) — the `build` script
-here runs `tsc --noEmit` first specifically to catch that, and there's a
-standalone `npm run typecheck` too.
+`@webgpu/types` gives autocomplete and type checks for `GPUDevice`, `GPUBuffer`, etc. `vite build`
+does **not** type-check (esbuild just strips types), so the `build` script runs `tsc --noEmit` first,
+and there is a standalone `npm run typecheck` too.
 
-## Building & deploying
+## Building
 
 ```bash
 npm run build
-npm run preview   # sanity-check the production build locally
+npm run preview   # check the production build locally
 ```
