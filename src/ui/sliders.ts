@@ -52,11 +52,6 @@ function parse(spec: SliderSpec, text: string): number | undefined {
 }
 
 export function createParameterSliders(container: HTMLElement, params: SliderValues, onChange: (key: keyof SliderValues) => void): void {
-    const equilibrium = document.createElement('div');
-    const showEquilibrium = () => {
-        equilibrium.textContent = `Equilibrium distance r₀ = √(K/G) = ${Number(Math.sqrt(params.K / params.G).toPrecision(3))}`;
-    };
-
     for (const spec of SLIDERS) {
         const label = document.createElement('label');
         label.textContent = spec.label;
@@ -76,7 +71,6 @@ export function createParameterSliders(container: HTMLElement, params: SliderVal
             box.value = String(value);
             if (value !== params[spec.key]) {
                 params[spec.key] = value;
-                showEquilibrium();
                 onChange(spec.key);
             }
         };
@@ -101,7 +95,4 @@ export function createParameterSliders(container: HTMLElement, params: SliderVal
         slider.value = String(toPosition(spec, params[spec.key]));
         container.append(label, box);
     }
-
-    showEquilibrium();
-    container.append(equilibrium);
 }
