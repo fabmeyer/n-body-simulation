@@ -2,7 +2,6 @@ import bodiesWgsl from './bodies.wgsl?raw';
 import {createCamera} from './camera.ts';
 import type {CreateRenderer} from '../shared/contract.ts';
 import type {BodyBuffers} from '../shared/buffers.ts';
-import {initialRadius} from '../shared/initial-radius.ts';
 
 const CLEAR_COLOR = {r: 0.067, g: 0.067, b: 0.067, a: 1}; // same as the page background (#111)
 const DEPTH_FORMAT: GPUTextureFormat = 'depth24plus';
@@ -33,7 +32,6 @@ export const createRenderer: CreateRenderer = (device, format, canvas, initialBu
         };
     }
     let bound = bindBuffers(initialBuffers);
-    camera.frameSphere(initialRadius(initialBuffers.n));
 
     // the depth texture and the aspect ratio follow the canvas, which changes size on resize
     let depthTexture: GPUTexture | undefined;
@@ -54,7 +52,9 @@ export const createRenderer: CreateRenderer = (device, format, canvas, initialBu
     return {
         setBuffers(buffers) {
             bound = bindBuffers(buffers);
-            camera.frameSphere(initialRadius(buffers.n)); // the starting sphere grows with N
+        },
+        setFieldOfView(degrees) {
+            camera.setFieldOfView(degrees);
         },
         recordDraw(encoder, target) {
             const depth = fitCanvasSize();

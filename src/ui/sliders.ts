@@ -1,14 +1,17 @@
 /*
- * Parameter sliders (issue #11): G, K, Softening, dt, plus N (issue #10)
- * the sliders change the params object in place and call onChange with the key that changed
+ * Parameter sliders (issue #11): G, K, Softening, dt, plus N (issue #10) and the camera's field of view
+ * the sliders change the values object in place and call onChange with the key that changed
  * every slider has an editable number box next to it (for N that's the N input from #10), both stay in sync
  */
 import type {Params} from '../shared/params.ts';
 
 export const MAX_N = 99999; // the force pass is O(N²), so 10x more Bodies = 100x more work
 
+// the Parameters plus the field of view (writeParams ignores fieldOfView, it's not in the Params struct)
+export type SliderValues = Params & {fieldOfView: number};
+
 interface SliderSpec {
-    key: keyof Params;
+    key: keyof SliderValues;
     label: string;
     min: number;
     max: number;
@@ -19,11 +22,12 @@ interface SliderSpec {
 
 // ranges allow interesting (and a little broken) behaviour, but not ε = 0, dt <= 0 or negative G, K
 const SLIDERS: SliderSpec[] = [
-    {key: 'G', label: 'G (Attraction)', min: 0.0, max: 5, log: false, integer: false, applyWhileDragging: true},
-    {key: 'K', label: 'K (Repulsion)', min: 0.0, max: 5, log: false, integer: false, applyWhileDragging: true},
-    {key: 'softening', label: 'ε (Softening)', min: 0.0001, max: 1.0, log: true, integer: false, applyWhileDragging: true},
-    {key: 'dt', label: 'dt', min: 0.001, max: 0.1, log: true, integer: false, applyWhileDragging: true},
-    {key: 'N', label: 'N (Bodies)', min: 2, max: MAX_N, log: true, integer: true, applyWhileDragging: true},
+    {key: 'G', label: 'G (Attraction)', min: 0.0, max: 20, log: false, integer: false, applyWhileDragging: false},
+    {key: 'K', label: 'K (Repulsion)', min: 0.0, max: 20, log: false, integer: false, applyWhileDragging: false},
+    {key: 'softening', label: 'ε (Softening)', min: 0.0001, max: 1.0, log: true, integer: false, applyWhileDragging: false},
+    {key: 'dt', label: 'dt', min: 0.001, max: 0.1, log: true, integer: false, applyWhileDragging: false},
+    {key: 'N', label: 'N (Bodies)', min: 2, max: MAX_N, log: true, integer: true, applyWhileDragging: false},
+    {key: 'fieldOfView', label: 'FoV (° zoom)', min: 10, max: 150, log: false, integer: false, applyWhileDragging: true},
 ];
 
 const SLIDER_STEPS = 1000; // resolution of every range input
@@ -47,7 +51,7 @@ function parse(spec: SliderSpec, text: string): number | undefined {
     return spec.integer ? Math.round(clamped) : clamped;
 }
 
-export function createParameterSliders(container: HTMLElement, params: Params, onChange: (key: keyof Params) => void): void {
+export function createParameterSliders(container: HTMLElement, params: SliderValues, onChange: (key: keyof SliderValues) => void): void {
     const equilibrium = document.createElement('div');
     const showEquilibrium = () => {
         equilibrium.textContent = `Equilibrium distance r₀ = √(K/G) = ${Number(Math.sqrt(params.K / params.G).toPrecision(3))}`;

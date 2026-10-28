@@ -1,12 +1,13 @@
 import {initWebGPU} from './shared/webgpu-init.ts';
 import {createBodyBuffers, destroyBodyBuffers} from './shared/buffers.ts';
-import {DEFAULT_PARAMS, writeParams, type Params} from './shared/params.ts';
+import {DEFAULT_PARAMS, writeParams} from './shared/params.ts';
 import {uploadInitialConditions} from './simulation/initial-conditions.ts';
 import {createSimulation} from './simulation/simulation.ts';
 import {runSanityChecks} from './simulation/sanity-checks.ts';
 import {createRenderer} from './renderer/renderer.ts';
+import {DEFAULT_FIELD_OF_VIEW} from './renderer/camera.ts';
 import {createFpsMeter} from './ui/fps.ts';
-import {createParameterSliders} from './ui/sliders.ts';
+import {createParameterSliders, type SliderValues} from './ui/sliders.ts';
 
 const SEED = 1;
 
@@ -27,7 +28,7 @@ try { // without this the page just stays black when WebGPU fails
     }
 
     // everything is created once, per frame only the command encoder and the texture view are new
-    const params: Params = {...DEFAULT_PARAMS}; // current values, changed by the sliders
+    const params: SliderValues = {...DEFAULT_PARAMS, fieldOfView: DEFAULT_FIELD_OF_VIEW}; // current values, changed by the sliders
     let buffers = createBodyBuffers(device, params.N, params);
     uploadInitialConditions(device, buffers, SEED);
     const simulation = createSimulation(device, buffers);
@@ -52,6 +53,8 @@ try { // without this the page just stays black when WebGPU fails
     createParameterSliders(document.getElementById('sliders') as HTMLDivElement, params, (key) => {
         if (key === 'N') {
             changeN();
+        } else if (key === 'fieldOfView') {
+            renderer.setFieldOfView(params.fieldOfView); // only the camera, not the Simulation
         } else {
             writeParams(device, buffers.params, params); // only when a value changes, used by the next Step
         }

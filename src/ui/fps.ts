@@ -1,9 +1,9 @@
 /*
  * FPS readout (issue #9): frames per second and ms per frame
  * measured between requestAnimationFrame timestamps, so it's what the user sees (not pure GPU time)
- * averaged over ~0.5 s and written to the DOM only then, not every frame
+ * raw numbers: updated every ~5 ms, which is every frame at 60-120 Hz, so it's the time of the last frame
  */
-const WINDOW_MS = 500;
+const WINDOW_MS = 5;
 
 export interface FpsMeter {
     frame(timestamp: number): void; // call once per frame with the requestAnimationFrame timestamp

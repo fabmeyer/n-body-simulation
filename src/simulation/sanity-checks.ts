@@ -4,8 +4,7 @@
  */
 import {createBodyBuffers, destroyBodyBuffers, type BodyBuffers} from '../shared/buffers.ts';
 import {createSimulation} from './simulation.ts';
-import {uploadInitialConditions} from './initial-conditions.ts';
-import {initialRadius} from '../shared/initial-radius.ts';
+import {SPHERE_RADIUS, uploadInitialConditions} from './initial-conditions.ts';
 import {readBuffer, readMapped} from './readback.ts';
 
 const BODY_BYTES = 4 * 4;
@@ -108,7 +107,7 @@ async function checkFiftyBodies(device: GPUDevice, seed: number): Promise<CheckR
         check: `#5: ${n} Bodies, seed ${seed}, ${steps} Steps`,
         result: `farthest Body from the centre: ${maxRadius(start).toFixed(2)} -> ${maxRadius(p).toFixed(2)}`,
         // "not to infinity": no NaN/Infinity and everything still within 10x the starting sphere
-        pass: finite && maxRadius(p) < 10 * initialRadius(n) && masses.every((m) => m === 1),
+        pass: finite && maxRadius(p) < 10 * SPHERE_RADIUS && masses.every((m) => m === 1),
     };
 }
 

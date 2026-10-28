@@ -32,6 +32,7 @@ export interface Simulation {
 export interface Renderer {
     recordDraw(encoder: GPUCommandEncoder, target: GPUTextureView): void;
     setBuffers(buffers: BodyBuffers): void; // after N changed, keeps the pipeline
+    setFieldOfView(degrees: number): void; // camera zoom
 }
 
 export type CreateSimulation = (device: GPUDevice, buffers: BodyBuffers) => Simulation;
