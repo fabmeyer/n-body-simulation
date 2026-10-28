@@ -14,10 +14,7 @@
  *
  * defaults: G = 1, K = 1, softening = 0.05, dt = 0.01, N = 50 (DEFAULT_PARAMS in params.ts)
  *
- * bindings in every shader (group 0):
- *   0 = params (uniform)
- *   1 = positions  (read_write in the position pass, read in the force pass and the Renderer)
- *   2 = velocities (read_write in the force pass, read in the position pass)
+ * binding numbers are internal to each pipeline (see its .wgsl file), positions is binding 1 in all of them by convention
  *
  * how main.ts uses the two parts:
  *   both are created once from the device and the shared buffers
